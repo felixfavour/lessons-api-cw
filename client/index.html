@@ -1,55 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lessons</title>
-    <script src="https://unpkg.com/vue@2"></script>
-    <style>
-      * {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      }
-      .ul-container {
-        display: flex;
-        flex-wrap: wrap;
-      }
-      ul {
-        border: 2px solid lightblue;
-        padding: 2rem;
-        margin-right: 1.2rem;
-      }
-      p {
-        font-size: 1.5rem;
-      }
-    </style>
-    <body>
-      <div id="store">
-        <p>Lesson Display</p>
-        <div class="ul-container">
-          <ul v-for="lesson in lessons" v-bind:key="lesson.location">
-            <li>topic: {{ lesson.topic }}</li>
-            <li>location: {{ lesson.location }}</li>
-            <li>price: {{ lesson.price }}</li>
-          </ul>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>After School Lessons</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="lessons.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <div class="logo">
+        <img src="images/AfterSchool.png" alt="">
+      </div>
+      <div class="header-actions">
+        <button class="outlined-btn" v-on:click="goToLessons">
+          Home
+        </button>
+        <button v-show="showCheckout" class="primary-btn" v-on:click="goToCheckout">
+          Go to cart ({{ cart.length }})
+        </button>
+      </div>
+    </div>
+    <div v-if="showLessons" class="home-page">
+      <div class="hero-banner">
+        <div class="text">
+          <h2 class="text-1">Find <span>After School</span></h2>
+          <h2 class="text-2">activities here.</h2>
         </div>
       </div>
-      <script>
-        let app = new Vue({
-          el: "#store",
-          data: {
-            lessons: [],
-          },
-          created: function () {
-            const BASE_URL = 'http://localhost:3000'
-            fetch(`${BASE_URL}/lessons`).then((response) => {
-              return response.json()
-            }).then(lessons => {
-              this.lessons = lessons
+      <section class="main-catalog">
+        <div class="filter-container">
+          <div>Sort By</div>
+          <hr>
+          <div class="sort-by">
+            <button v-bind:class="['inverse-btn', { 'primary-btn':sortingType === 'nothing'}]" v-on:click="sortLessons('nothing')">
+              Default
+            </button>
+            <button v-bind:class="['inverse-btn', { 'primary-btn':sortingType === 'subject'}]" v-on:click="sortLessons('subject')">
+              Subject
+            </button>
+            <button v-bind:class="['inverse-btn', { 'primary-btn':sortingType === 'location'}]" v-on:click="sortLessons('location')">
+              Location
+            </button>
+            <button v-bind:class="['inverse-btn', { 'primary-btn':sortingType === 'price'}]" v-on:click="sortLessons('price')">
+              Price
+            </button>
+            <button v-bind:class="['inverse-btn', { 'primary-btn':sortingType === 'availability'}]" v-on:click="sortLessons('availability')">
+              Availability
+            </button>
+          </div>
+          <hr>
+          <div class="sort-by">
+            <button v-bind:disabled="sortingDirection === 'asc'" v-bind:class="['dark-inverse-btn', { 'dark-primary-btn':sortingDirection === 'asc'}]" v-on:click="sortDirection('asc')">
+              Ascending
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M15 2C15 1.73478 14.8946 1.48043 14.7071 1.29289C14.5196 1.10536 14.2652 1 14 1H2C1.73478 1 1.48043 1.10536 1.29289 1.29289C1.10536 1.48043 1 1.73478 1 2V14C1 14.2652 1.10536 14.5196 1.29289 14.7071C1.48043 14.8946 1.73478 15 2 15H14C14.2652 15 14.5196 14.8946 14.7071 14.7071C14.8946 14.5196 15 14.2652 15 14V2ZM0 2C0 1.46957 0.210714 0.960859 0.585786 0.585786C0.960859 0.210714 1.46957 0 2 0L14 0C14.5304 0 15.0391 0.210714 15.4142 0.585786C15.7893 0.960859 16 1.46957 16 2V14C16 14.5304 15.7893 15.0391 15.4142 15.4142C15.0391 15.7893 14.5304 16 14 16H2C1.46957 16 0.960859 15.7893 0.585786 15.4142C0.210714 15.0391 0 14.5304 0 14V2ZM8.5 11.5C8.5 11.6326 8.44732 11.7598 8.35355 11.8536C8.25979 11.9473 8.13261 12 8 12C7.86739 12 7.74021 11.9473 7.64645 11.8536C7.55268 11.7598 7.5 11.6326 7.5 11.5V5.707L5.354 7.854C5.26011 7.94789 5.13278 8.00063 5 8.00063C4.86722 8.00063 4.73989 7.94789 4.646 7.854C4.55211 7.76011 4.49937 7.63278 4.49937 7.5C4.49937 7.36722 4.55211 7.23989 4.646 7.146L7.646 4.146C7.69245 4.09944 7.74762 4.06249 7.80837 4.03729C7.86911 4.01208 7.93423 3.99911 8 3.99911C8.06577 3.99911 8.13089 4.01208 8.19163 4.03729C8.25238 4.06249 8.30755 4.09944 8.354 4.146L11.354 7.146C11.4479 7.23989 11.5006 7.36722 11.5006 7.5C11.5006 7.63278 11.4479 7.76011 11.354 7.854C11.2601 7.94789 11.1328 8.00063 11 8.00063C10.8672 8.00063 10.7399 7.94789 10.646 7.854L8.5 5.707V11.5Z" fill="#00B2FF"/>
+              </svg>
+            </button>
+            <button v-bind:disabled="sortingDirection === 'desc'" v-bind:class="['dark-inverse-btn', { 'dark-primary-btn':sortingDirection === 'desc'}]" v-on:click="sortDirection('desc')">
+              Descending
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M1 14C1 14.2652 1.10536 14.5196 1.29289 14.7071C1.48043 14.8946 1.73478 15 2 15L14 15C14.2652 15 14.5196 14.8946 14.7071 14.7071C14.8946 14.5196 15 14.2652 15 14L15 2C15 1.73478 14.8946 1.48043 14.7071 1.29289C14.5196 1.10536 14.2652 1 14 1L2 1C1.73478 1 1.48043 1.10536 1.29289 1.29289C1.10536 1.48043 1 1.73478 1 2L1 14ZM16 14C16 14.5304 15.7893 15.0391 15.4142 15.4142C15.0391 15.7893 14.5304 16 14 16L2 16C1.46957 16 0.96086 15.7893 0.585787 15.4142C0.210714 15.0391 0 14.5304 0 14L0 2C0 1.46957 0.210714 0.96086 0.585787 0.585787C0.96086 0.210714 1.46957 0 2 0H14C14.5304 0 15.0391 0.210714 15.4142 0.585787C15.7893 0.96086 16 1.46957 16 2V14ZM7.5 4.5C7.5 4.36739 7.55268 4.24021 7.64645 4.14645C7.74021 4.05268 7.86739 4 8 4C8.13261 4 8.25979 4.05268 8.35355 4.14645C8.44732 4.24021 8.5 4.36739 8.5 4.5L8.5 10.293L10.646 8.146C10.7399 8.05211 10.8672 7.99937 11 7.99937C11.1328 7.99937 11.2601 8.05211 11.354 8.146C11.4479 8.23989 11.5006 8.36722 11.5006 8.5C11.5006 8.63278 11.4479 8.76011 11.354 8.854L8.354 11.854C8.30755 11.9006 8.25238 11.9375 8.19163 11.9627C8.13089 11.9879 8.06577 12.0009 8 12.0009C7.93423 12.0009 7.86911 11.9879 7.80837 11.9627C7.74762 11.9375 7.69245 11.9006 7.646 11.854L4.646 8.854C4.55211 8.76011 4.49937 8.63278 4.49937 8.5C4.49937 8.36722 4.55211 8.23989 4.646 8.146C4.73989 8.05211 4.86722 7.99937 5 7.99937C5.13278 7.99937 5.26011 8.05211 5.354 8.146L7.5 10.293L7.5 4.5Z" fill="#00B2FF"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="catalog-body page">
+          <div class="catalog-header">
+            <h2 v-if="searchQuery === ''">All Lessons</h2>
+            <h2 v-else class="come-up">Lessons that match: "{{ searchQuery }}"</h2>
+            <label class="search-input" for="search">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.75 15.75L12.3855 12.3795L15.75 15.75ZM14.25 7.875C14.25 9.56576 13.5784 11.1873 12.3828 12.3828C11.1873 13.5784 9.56576 14.25 7.875 14.25C6.18424 14.25 4.56274 13.5784 3.36719 12.3828C2.17165 11.1873 1.5 9.56576 1.5 7.875C1.5 6.18424 2.17165 4.56274 3.36719 3.36719C4.56274 2.17165 6.18424 1.5 7.875 1.5C9.56576 1.5 11.1873 2.17165 12.3828 3.36719C13.5784 4.56274 14.25 6.18424 14.25 7.875V7.875Z" stroke="#00577C" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <input type="search" v-model="searchQuery" placeholder="Search Lessons" v-on:input="searchLessons(searchQuery)">
+            </label>
+          </div>
+          <div class="lessons-catalog">
+            <div v-for="lesson in lessons" class="lesson-card">
+              <img v-bind:src="lesson.image" alt="">
+              <div class="lesson-info">
+                <div class="lesson-info-top">
+                  <div class="lesson-subject-and-price">
+                    <span class="lesson-subject">
+                      {{ lesson.subject }}
+                    </span>
+                    <span class="lesson-price">
+                      ${{ lesson.price }}
+                    </span>
+                  </div>
+                  <div class="lesson-location">
+                    {{ lesson.location }}
+                  </div>
+                  <div v-if="lesson.spaces >= 5" class="lesson-spaces">
+                    {{ lesson.spaces }} spaces
+                  </div>
+                  <div v-else-if="lesson.spaces >= 2" class="lesson-spaces lightblue come-up">
+                    {{ lesson.spaces }} spaces left!
+                  </div>
+                  <div v-else-if="lesson.spaces === 1" class="lesson-spaces red">
+                    Only one space left!
+                  </div>
+                  <div v-else class="lesson-spaces fade">
+                    No spaces left
+                  </div>
+                </div>
+                <div class="lesson-info-bottom">
+                  <div class="stars">
+                    <svg v-for="star in lesson.stars" class="star-filled" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M18.2892 7.64918C18.2368 7.4949 18.1404 7.35934 18.0119 7.25923C17.8833 7.15912 17.7283 7.09884 17.5659 7.08585L12.815 6.70835L10.7592 2.15751C10.6937 2.01094 10.5872 1.88645 10.4526 1.79906C10.3179 1.71167 10.1608 1.66513 10.0003 1.66504C9.83978 1.66495 9.68266 1.71132 9.5479 1.79856C9.41314 1.8858 9.30651 2.01018 9.24088 2.15668L7.18504 6.70835L2.43421 7.08585C2.27459 7.09849 2.12199 7.15685 1.99467 7.25395C1.86735 7.35106 1.7707 7.48278 1.71629 7.63337C1.66187 7.78396 1.65199 7.94704 1.68783 8.1031C1.72367 8.25916 1.80371 8.40159 1.91838 8.51335L5.42921 11.9358L4.18754 17.3125C4.14984 17.4753 4.16192 17.6456 4.22223 17.8014C4.28253 17.9572 4.38826 18.0913 4.52571 18.1862C4.66316 18.2812 4.82597 18.3326 4.99303 18.3339C5.16008 18.3352 5.32366 18.2862 5.46254 18.1933L10 15.1683L14.5375 18.1933C14.6795 18.2876 14.8469 18.3361 15.0172 18.3324C15.1876 18.3286 15.3527 18.2728 15.4904 18.1725C15.6281 18.0721 15.7317 17.9319 15.7873 17.7709C15.843 17.6099 15.848 17.4357 15.8017 17.2717L14.2775 11.9383L18.0575 8.53668C18.305 8.31335 18.3959 7.96501 18.2892 7.64918Z" fill="#FFA113"/>
+                    </svg>
+                    <svg v-for="star in 5-lesson.stars" class="star-outlined" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5.42998 11.9358L4.18831 17.3125C4.14987 17.4753 4.16141 17.6459 4.22143 17.8021C4.28146 17.9582 4.38718 18.0926 4.52479 18.1878C4.6624 18.2829 4.82549 18.3343 4.99278 18.3353C5.16006 18.3363 5.32375 18.2868 5.46248 18.1933L9.99998 15.1683L14.5375 18.1933C14.6794 18.2876 14.8468 18.3361 15.0172 18.3324C15.1875 18.3286 15.3526 18.2728 15.4903 18.1724C15.628 18.0721 15.7316 17.9319 15.7873 17.7709C15.8429 17.6098 15.848 17.4356 15.8016 17.2717L14.2775 11.9383L18.0575 8.53666C18.1785 8.42765 18.265 8.28554 18.3062 8.12792C18.3473 7.97029 18.3414 7.80406 18.2891 7.64978C18.2367 7.49549 18.1404 7.35993 18.0118 7.25985C17.8833 7.15976 17.7282 7.09955 17.5658 7.08666L12.815 6.70833L10.7591 2.15749C10.6936 2.01095 10.587 1.88652 10.4523 1.79921C10.3176 1.7119 10.1605 1.66544 9.99998 1.66544C9.83945 1.66544 9.68235 1.7119 9.54764 1.79921C9.41293 1.88652 9.30637 2.01095 9.24081 2.15749L7.18498 6.70833L2.43415 7.08583C2.27453 7.09847 2.12193 7.15683 1.99461 7.25393C1.86729 7.35104 1.77064 7.48276 1.71623 7.63335C1.66181 7.78394 1.65193 7.94702 1.68777 8.10308C1.72361 8.25914 1.80365 8.40157 1.91831 8.51333L5.42998 11.9358V11.9358ZM7.80748 8.33083C7.95623 8.31911 8.09908 8.26759 8.22107 8.18167C8.34305 8.09575 8.43968 7.9786 8.50081 7.84249L9.99998 4.52499L11.4991 7.84249C11.5603 7.9786 11.6569 8.09575 11.7789 8.18167C11.9009 8.26759 12.0437 8.31911 12.1925 8.33083L15.5025 8.59333L12.7766 11.0467C12.54 11.26 12.4458 11.5883 12.5325 11.895L13.5766 15.5492L10.4633 13.4733C10.3267 13.3816 10.1658 13.3326 10.0012 13.3326C9.83665 13.3326 9.6758 13.3816 9.53915 13.4733L6.28581 15.6425L7.16081 11.8542C7.1929 11.7148 7.18859 11.5696 7.14831 11.4324C7.10803 11.2952 7.03313 11.1707 6.93081 11.0708L4.39915 8.60249L7.80748 8.33083V8.33083Z" fill="#FFA113"/>
+                    </svg>
+                  </div>
+                  <button v-if="canAddToCart(lesson)" v-on:click="addToCart(lesson)" class="primary-btn">
+                    <span>Add to Cart</span> <span>+</span>
+                  </button>
+                  <button v-else="canAddToCart(lesson)" disabled="true" class="primary-btn">
+                    <span>Add to Cart</span> <span>+</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div v-else class="shopping-cart-page">
+      <div class="hero-banner">
+        <div class="text">
+          <h2 class="text-1">Shopping Cart</h2>
+        </div>
+      </div>
+      <section class="main-catalog page">
+        <div class="catalog-body">
+          <div class="catalog-header">
+            <h2>All Selected Lessons</h2>
+          </div>
+          <div class="lessons-catalog">
+            <div v-for="(lesson, index) in cart" class="lesson-card">
+              <img v-bind:src="lesson.image" alt="">
+              <div class="lesson-info">
+                <div class="lesson-info-top">
+                  <div class="lesson-subject-and-price">
+                    <span class="lesson-subject">
+                      {{ lesson.subject }}
+                    </span>
+                    <span class="lesson-price">
+                      ${{ lesson.price }}
+                    </span>
+                  </div>
+                  <div class="lesson-location">
+                    {{ lesson.location }}
+                  </div>
+                  <!-- <div class="lesson-spaces">
+                    {{ lesson.spaces }} spaces
+                  </div> -->
+                </div>
+                <div class="lesson-info-bottom">
+                  <div class="stars">
+                    <svg v-for="star in lesson.stars" class="star-filled" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M18.2892 7.64918C18.2368 7.4949 18.1404 7.35934 18.0119 7.25923C17.8833 7.15912 17.7283 7.09884 17.5659 7.08585L12.815 6.70835L10.7592 2.15751C10.6937 2.01094 10.5872 1.88645 10.4526 1.79906C10.3179 1.71167 10.1608 1.66513 10.0003 1.66504C9.83978 1.66495 9.68266 1.71132 9.5479 1.79856C9.41314 1.8858 9.30651 2.01018 9.24088 2.15668L7.18504 6.70835L2.43421 7.08585C2.27459 7.09849 2.12199 7.15685 1.99467 7.25395C1.86735 7.35106 1.7707 7.48278 1.71629 7.63337C1.66187 7.78396 1.65199 7.94704 1.68783 8.1031C1.72367 8.25916 1.80371 8.40159 1.91838 8.51335L5.42921 11.9358L4.18754 17.3125C4.14984 17.4753 4.16192 17.6456 4.22223 17.8014C4.28253 17.9572 4.38826 18.0913 4.52571 18.1862C4.66316 18.2812 4.82597 18.3326 4.99303 18.3339C5.16008 18.3352 5.32366 18.2862 5.46254 18.1933L10 15.1683L14.5375 18.1933C14.6795 18.2876 14.8469 18.3361 15.0172 18.3324C15.1876 18.3286 15.3527 18.2728 15.4904 18.1725C15.6281 18.0721 15.7317 17.9319 15.7873 17.7709C15.843 17.6099 15.848 17.4357 15.8017 17.2717L14.2775 11.9383L18.0575 8.53668C18.305 8.31335 18.3959 7.96501 18.2892 7.64918Z" fill="#FFA113"/>
+                    </svg>
+                    <svg v-for="star in 5-lesson.stars" class="star-outlined" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5.42998 11.9358L4.18831 17.3125C4.14987 17.4753 4.16141 17.6459 4.22143 17.8021C4.28146 17.9582 4.38718 18.0926 4.52479 18.1878C4.6624 18.2829 4.82549 18.3343 4.99278 18.3353C5.16006 18.3363 5.32375 18.2868 5.46248 18.1933L9.99998 15.1683L14.5375 18.1933C14.6794 18.2876 14.8468 18.3361 15.0172 18.3324C15.1875 18.3286 15.3526 18.2728 15.4903 18.1724C15.628 18.0721 15.7316 17.9319 15.7873 17.7709C15.8429 17.6098 15.848 17.4356 15.8016 17.2717L14.2775 11.9383L18.0575 8.53666C18.1785 8.42765 18.265 8.28554 18.3062 8.12792C18.3473 7.97029 18.3414 7.80406 18.2891 7.64978C18.2367 7.49549 18.1404 7.35993 18.0118 7.25985C17.8833 7.15976 17.7282 7.09955 17.5658 7.08666L12.815 6.70833L10.7591 2.15749C10.6936 2.01095 10.587 1.88652 10.4523 1.79921C10.3176 1.7119 10.1605 1.66544 9.99998 1.66544C9.83945 1.66544 9.68235 1.7119 9.54764 1.79921C9.41293 1.88652 9.30637 2.01095 9.24081 2.15749L7.18498 6.70833L2.43415 7.08583C2.27453 7.09847 2.12193 7.15683 1.99461 7.25393C1.86729 7.35104 1.77064 7.48276 1.71623 7.63335C1.66181 7.78394 1.65193 7.94702 1.68777 8.10308C1.72361 8.25914 1.80365 8.40157 1.91831 8.51333L5.42998 11.9358V11.9358ZM7.80748 8.33083C7.95623 8.31911 8.09908 8.26759 8.22107 8.18167C8.34305 8.09575 8.43968 7.9786 8.50081 7.84249L9.99998 4.52499L11.4991 7.84249C11.5603 7.9786 11.6569 8.09575 11.7789 8.18167C11.9009 8.26759 12.0437 8.31911 12.1925 8.33083L15.5025 8.59333L12.7766 11.0467C12.54 11.26 12.4458 11.5883 12.5325 11.895L13.5766 15.5492L10.4633 13.4733C10.3267 13.3816 10.1658 13.3326 10.0012 13.3326C9.83665 13.3326 9.6758 13.3816 9.53915 13.4733L6.28581 15.6425L7.16081 11.8542C7.1929 11.7148 7.18859 11.5696 7.14831 11.4324C7.10803 11.2952 7.03313 11.1707 6.93081 11.0708L4.39915 8.60249L7.80748 8.33083V8.33083Z" fill="#FFA113"/>
+                    </svg>
+                  </div>
+                  <button class="primary-btn remove-btn" v-on:click="removeFromCart(index)">
+                    <span>Remove from Cart</span> <span>-</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="checkout-box page">
+        <div class="inner">
+          <h2>Checkout</h2>
+          <form>
+            <label v-bind:class="{ 'error-input': !nameValid }" for="name">
+              Name
+              <input type="text" v-model.trim="name" name="name" id="name">
+              <span class="come-up">
+                Name must contain only letters
+              </span>
+            </label>
+            <label  v-bind:class="{ 'error-input': !phoneNumberValid }" for="name">
+              Phone
+              <input type="number" v-model.number="phone" name="phone" id="phone">
+              <span class="come-up">
+                Phone Number must contain only numbers
+              </span>
+            </label>
+            <button v-bind:disabled="!(nameValid && phoneNumberValid)" type="button" class="primary-btn" v-on:click="submitOrder">
+              Checkout
+            </button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data: {
+        lessons: lessons,
+        lessonsCopy: lessons,
+        filterableLessons: lessons,
+        cart: [],
+        sortingType: 'nothing',
+        sortingDirection: 'asc',
+        showLessons: true,
+        name: '',
+        phone: '',
+        searchQuery: ''
+      },
+      methods: {
+        addToCart: function (lesson) {
+          this.cart.push(lesson)
+          lesson.spaces--
+        },
+        removeFromCart: function (index) {
+          this.cart.splice(index, 1)
+          // If item being removed is the last item, go back to home, hence set [showLessons] to true
+          if (this.cart.length === 0) {
+            this.showLessons = true
+          }
+        },
+        canAddToCart: function (lesson) {
+          return lesson.spaces > 0
+        },
+        goToLessons: function () {
+          this.showLessons = true
+        },
+        goToCheckout: function () {
+          this.showLessons = false
+        },
+        sortDirection: function (dir) {
+          this.sortingDirection = dir
+          const lessonsCopy = this.lessons.slice(0)
+          this.lessons = lessonsCopy.reverse()
+        },
+        searchLessons (query) {
+          const lessonsCopy = this.lessonsCopy.slice(0)
+          if (query === '') {
+            this.lessons = this.lessonsCopy
+          } else {       
+            this.lessons = lessonsCopy.filter(function (lesson) {
+              return JSON.stringify(lesson).toLowerCase().includes(query.toLowerCase())
             })
           }
-        });
-      </script>
-    </body>
-  </head>
+        },
+        submitOrder: function () {
+          alert('Thank you, your order has been submitted.')
+        },
+        sortLessons: function (type) {
+          this.sortingType = type
+          this.sortingDirection = 'asc'
+          const lessonsCopy = this.lessonsCopy.slice(0)
+          let compare = function () {}
+          switch (type) {
+            case 'nothing': 
+              this.lessons = lessonsCopy
+              break
+            case 'subject': 
+              compare = function (a, b) {
+                if (a.subject.toLowerCase() < b.subject.toLowerCase()) {
+                  return -1
+                } else if (b.subject.toLowerCase() < a.subject.toLowerCase()) {
+                  return 1
+                }
+                return 0
+              }
+              this.lessons = lessonsCopy.sort(compare)
+              break
+            case 'location': 
+              compare = function (a, b) {
+                if (a.location.toLowerCase() < b.location.toLowerCase()) {
+                  return -1
+                } else if (b.location.toLowerCase() < a.location.toLowerCase()) {
+                  return 1
+                }
+                return 0
+              }
+              this.lessons = lessonsCopy.sort(compare)
+              break
+            case 'price': 
+              compare = function (a, b) {
+                return a.price - b.price
+              }
+              this.lessons = lessonsCopy.sort(compare)
+              break
+            case 'availability': 
+              compare = function (a, b) {
+                return a.spaces - b.spaces
+              }
+              this.lessons = lessonsCopy.sort(compare)
+              break
+          }
+          
+        }
+      },
+      computed: {
+        showCheckout () {
+          return this.cart.length > 0
+        },
+        nameValid () {
+          const nameRegex = /^[a-z A-Z]+$/
+          return nameRegex.test(this.name)
+        },
+        phoneNumberValid () {
+          const phoneRegex = /^[\d]+$/
+          return phoneRegex.test(this.phone)
+        }
+      }
+    });
+  </script>
+</body>
 </html>
