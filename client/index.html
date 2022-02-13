@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lessons</title>
+    <script src="https://unpkg.com/vue@2"></script>
+    <style>
+      * {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .ul-container {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      ul {
+        border: 2px solid lightblue;
+        padding: 2rem;
+        margin-right: 1.2rem;
+      }
+      p {
+        font-size: 1.5rem;
+      }
+    </style>
+    <body>
+      <div id="store">
+        <p>Lesson Display</p>
+        <div class="ul-container">
+          <ul v-for="lesson in lessons" v-bind:key="lesson.location">
+            <li>topic: {{ lesson.topic }}</li>
+            <li>location: {{ lesson.location }}</li>
+            <li>price: {{ lesson.price }}</li>
+          </ul>
+        </div>
+      </div>
+      <script>
+        let app = new Vue({
+          el: "#store",
+          data: {
+            lessons: [],
+          },
+          created: function () {
+            const BASE_URL = 'http://localhost:3000'
+            fetch(`${BASE_URL}/lessons`).then((response) => {
+              return response.json()
+            }).then(lessons => {
+              this.lessons = lessons
+            })
+          }
+        });
+      </script>
+    </body>
+  </head>
+</html>
