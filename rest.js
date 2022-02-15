@@ -5,11 +5,11 @@ var http = require("http");
 var app = express();
 const port = process.env.port || 3000;
 
-var lessons = require("./data/lessons.json");
-var user = require("./data/user.json");
+// Add Middleware
 app.use(express.json())
 
-//CORS allows you to configure the web API's security. It has to do with allowing other domains to make requests against your web API.
+// CORS allows you to configure the web API's security. 
+// It has to do with allowing other domains to make requests against your web API.
 app.use(cors());
 
 const { MongoClient } = require('mongodb')
