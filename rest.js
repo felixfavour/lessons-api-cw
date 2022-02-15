@@ -3,7 +3,7 @@ var cors = require("cors");
 
 var http = require("http");
 var app = express();
-const port = process.env.port || 3000;
+const port = process.env.PORT || 3000;
 
 // Add Middleware
 app.use(express.json())
