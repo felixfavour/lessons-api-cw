@@ -16,7 +16,6 @@ const { MongoClient } = require('mongodb')
 const username = 'favourfelix'
 const password = 'emmanuel'
 const dbName = 'afterschool'
-const collectionName = 'lessons'
 
 let db = null
 
@@ -34,14 +33,19 @@ async function main () {
 
 main().catch(console.error)
 
-app.get("/lessons", async (req, res) => {
-  const lessons = await db.collection(collectionName).find().toArray()
-  res.status(200).json(lessons); 
+app.get('/lessons', async (req, res, next) => {
+  await db.collection('lesson').find().toArray((e, results) => {
+    if (e) return next(e)
+    res.json(results)
+  })
 });
 
-app.get("/user", (req, res) => {
-  res.status(200).json({}); 
-});
+app.post('/order', async (req, res, next) => {
+  await db.collection('order').insertOne(req.body, (e, results) => {
+    if (e) return next(e)
+    res.status(201).send(results)
+  })
+})
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
