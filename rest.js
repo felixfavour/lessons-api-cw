@@ -90,7 +90,19 @@ app.put('/collection/:collectionName/:id', async function (req, res, next) {
   })
 })
 
+// Endpoint to perform a Full Text Search on lessons
+app.get('/search/:collectionName', async function (req, res, next) {
+  const regex = new RegExp(`.*${req.query.name}.*`, 'gi')
+
+  await req.collection.find({ topic: regex  })
+  .toArray((err, results) => {
+    res.json(results)
+    if (err) return next(err)
+  })
+})
+
 // Listen to port
 app.listen(port, function () {
   console.log(`Server running at http://localhost:${port}`);
+
 });
