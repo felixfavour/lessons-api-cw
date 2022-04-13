@@ -4,7 +4,7 @@ const path = require("path")
 const fs = require("fs")
 const http = require("http")
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 4400
 
 // MIDDLEWARES
 // use Parser Middleware
@@ -92,7 +92,8 @@ app.put('/collection/:collectionName/:id', async function (req, res, next) {
 
 // Endpoint to perform a Full Text Search on lessons
 app.get('/search/:collectionName', async function (req, res, next) {
-  await req.collection.find({ $text: { $search: req.query.query }  })
+  const topic = new RegExp(`.*${req.query.query}.*`, 'gi')
+  await req.collection.find({ topic: topic })
   .toArray((err, results) => {
     res.json(results)
     if (err) return next(err)
